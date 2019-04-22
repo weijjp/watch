@@ -128,7 +128,11 @@ def login():
             # 重新返回登录页面
             return redirect(url_for('login'))
         # 读取User表格的第一个记录(一个实例)，然后赋值给变量 user
-        user = User.query.first()
+        user = User.query.filter_by(username=username).first()
+        ###查看结果
+        print(user)
+        print(username)
+        print(user.username)
         # 如果：
              # 变量username(表单输入的值)==user.username(User表格的第一个记录username列对应的值)
              # 并且，调用对象user的自定义validate_password()方法核对password，结果为True
@@ -173,9 +177,9 @@ def settings():
     # 如果以post方式访问
     if request.method == 'POST':
         # 读取表单：将request对象的表单的name键对应的值,赋给变量name
-        name = request.form['name']
+        nickname = request.form['nickname']
         # 如果表单输入为空值，或者输入值长度大于20个字符
-        if not name or len(name) > 20:
+        if not nickname or len(nickname) > 20:
             # 在后续页面闪现：无效输入
             flash('Invalid input.')
             # 重定向到settings设置页面
@@ -183,10 +187,12 @@ def settings():
         else:
             # 上面50行已完成了注册用户加载回调函数,即已完成Flask-Login的current_user变量的赋值
             # current_user即当前用户代理，将上面变量name(表单输入值)重写当前用户对象的name属性
-            current_user.name = name
+            current_user.nickname = nickname
             # current_user 会返回当前登录用户的数据库记录对象，等同于下面的用法：
             # user = User.query.first()
             # user.name = name
+            # user = User.query.filter_by(username=username).first()
+            # user.nickname = nickname
 
             # 将更新后的会话信息提交给数据库
             db.session.commit()
@@ -198,3 +204,25 @@ def settings():
     else:
         # 返回settings设置页面
         return render_template('settings.html')
+
+################################################################################用命令在User模型中注册管理员帐户
+# 自定义创建数据库表的函数admin()的Flask命令admin，用命令执行下面函数
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        user = User.query.first()
+        if user is not None:
+            user.username = username
+            user.nickname = username
+            user.set_password(password)
+        else:
+            user = User(username=username, nickname=username)
+            user.set_password(password)
+            db.session.add(user)
+        db.session.commit()
+        flash('Register successfully.')
+        return redirect(url_for('index'))
+    else:
+        return render_template('register.html')

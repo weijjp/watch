@@ -55,7 +55,7 @@ def forge():
     # 创建数据库所有表格（创建一个空表格）
     # db.create_all()
     # 定义变量name
-    name = 'weijp'
+    nickname = 'Beginners'
     # 定义字典变量movie
     movies = [
         {'title': 'My Neighbor Totoro', 'year': '1988'},
@@ -72,7 +72,7 @@ def forge():
         {'title': 'The Pork of Music', 'year': '2012'},
     ]
     # 将变量name(即weijp)传User类的name列，实例化User类创建表格user(表格name列的数据为weijp),即在空表格中创建一条记录
-    user = User(name=name)
+    user = User(nickname=nickname)
     # 将表格的实例对象user(一条记录name=weijp)添加到数据库会话
     db.session.add(user)
     # 将列表变量movie的字典元素遍历赋给变量m
@@ -98,9 +98,10 @@ def forge():
 @click.option('--username',prompt=True,help='The username used to login.')  #
 # 设置命令admin的位置参数password及输入方式：prompt=True提示用户输入，hide_input=True隐藏输入信息，confirmation_prompt=为True需要做信息二次确认
 @click.option('--password', prompt=True,hide_input=True, confirmation_prompt=True, help='The password used to login.')
-def admin(username, password):
+def register(username, password):
     """Create user."""
     # 创建数据库所有表格（创建一个空表格）
+    # 考虑到第一次创建数据库，如果上面已经初始过，数据库已经存在，就不需要这一步创建一个新的数据库
     db.create_all()
     # 读取User表格的第一个记录(一个实例)，然后赋值给变量 user
     # 如果上面forget()被执行过，这个记录就是weijp,如果没有被执行过，这个记录就是一个空值
@@ -121,7 +122,7 @@ def admin(username, password):
         # click.echo():将消息加上换行符打印到给定文件或标准输出,即输出提示信息：创建用户记录
         click.echo('Creating user...')
         # 把参数username赋给User类的username属性，把字符串'Admin'赋给User类的name属性，然后实例化创建一条记录user(User类实例化对象)
-        user = User(username=username, name='Admin')
+        user = User(username=username, nickname='Admin')
         # 利用user记录的set_password()方法为参数password设置一个加密的密码
               # 该方法又把加密后的密码赋值给实例对象user的password_hash属性
         user.set_password(password)
