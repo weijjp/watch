@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h3>Messages</h3>
+
+{% if current_user.is_authenticated %}
+<form method="post">
+    Messages<input type="text" name="messages" required>
+    <input class="btn" type="submit" name="submit" value="Submit">
+</form>
+<em style="color: blue; font-size: 2em;" >{{user.nickname}},do a good job!</em><br>
+<em style="color: green; font-size: 2em;" >Thank you for your message:{{messages}}</em><br>
+{% endif %}
+
+
+
+  {% for ms in meges_2 %}
+  <li>{{ ms.nickname }} - {{ ms.dati }} -{{ ms.messages }}  </li>
+  {% endfor %}
+
+
+{% endblock %}

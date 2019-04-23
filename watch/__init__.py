@@ -76,8 +76,8 @@ def inject_user():
     # 获取 User 模型的第一个记录，然后赋值给变量 user
     user = User.query.first()
     # 用dict()函数创建一个映射字典，结果{'user': user}
-    di = dict(user=user)
+    dic = dict(user=user)
     # 返回映射字典
-    return di
+    return dic
 
 from watch import views, errors, commands

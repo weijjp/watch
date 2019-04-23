@@ -4,9 +4,10 @@ from watch import app, db
 from flask import render_template, request, url_for, redirect, flash
 # 从flask_login扩展中导入LoginManager类，UserMixin类, login_user方法，logout_user方法，current_user属性
 from flask_login import login_user, login_required, logout_user, current_user
+from datetime import datetime
 # 从 watch包的models模块中导入User类 和 Movie类
 # 因为我们在__init__.py文件没有导入models模块，所以写成watch.models
-from watch.models import User, Movie
+from watch.models import User, Movie, Message
 
 ############ 数据库操作-------从数据库中读取数据
 @app.route('/', methods=['GET', 'POST']) #####版本1.2
@@ -130,9 +131,9 @@ def login():
         # 读取User表格的第一个记录(一个实例)，然后赋值给变量 user
         user = User.query.filter_by(username=username).first()
         ###查看结果
-        print(user)
-        print(username)
-        print(user.username)
+        # print(user)
+        # print(username)
+        # print(user.username)
         # 如果：
              # 变量username(表单输入的值)==user.username(User表格的第一个记录username列对应的值)
              # 并且，调用对象user的自定义validate_password()方法核对password，结果为True
@@ -205,8 +206,7 @@ def settings():
         # 返回settings设置页面
         return render_template('settings.html')
 
-################################################################################用命令在User模型中注册管理员帐户
-# 自定义创建数据库表的函数admin()的Flask命令admin，用命令执行下面函数
+################################################################################在表单中注册管理员帐户
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -226,3 +226,39 @@ def register():
         return redirect(url_for('index'))
     else:
         return render_template('register.html')
+
+################################################################################在表单中添加留言
+
+@app.route('/messages', methods=['GET', 'POST'])
+def messages():
+    user = current_user
+    if request.method == 'POST':
+        messages = request.form['messages']
+        dati = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        print(messages)
+        print(user.nickname)
+        print(dati)
+        message = Message(nickname=user.nickname, dati=dati, messages=messages)
+        db.session.add(message)
+        db.session.commit()
+        meges_1 = Message.query.all()
+        list=[]
+        n = len(meges_1)
+        for ms in meges_1:
+            list.append(meges_1[n-1])
+            n = n-1
+        meges_2 = list
+        print('-'*20)
+        for ms in meges_2:
+            print(ms.nickname, ms.dati, ms.messages)
+        flash('Leave messages successfully.')
+        return render_template('messages.html', messages=messages)
+    else:
+        meges_1 = Message.query.all()
+        list=[]
+        n = len(meges_1)
+        for ms in meges_1:
+            list.append(meges_1[n-1])
+            n = n-1
+        meges_2 = list
+        return render_template('messages.html', meges_2=meges_2)

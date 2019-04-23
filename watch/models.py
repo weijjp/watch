@@ -20,6 +20,7 @@ class User(db.Model, UserMixin):
     # 增加一个管理用户名的登录密码属性
     password_hash = db.Column(db.String(128))
 
+
     # 自定义方法set_password()用来设置密码，接受password作为参数
     def set_password(self, password):
         # 调用werkzeug的generate_password_hash()方法将参数password转成密码散列值
@@ -39,3 +40,9 @@ class Movie(db.Model):
     id = db.Column(db.Integer, primary_key=True) # 见上面
     title = db.Column(db.String(60))             # 见上面
     year = db.Column(db.String(4))               # 见上面
+
+class Message(db.Model, UserMixin):
+    id = db.Column(db.Integer, primary_key=True)
+    nickname = db.Column(db.String(20))
+    dati = db.Column(db.String(40))
+    messages = db.Column(db.String(128))
