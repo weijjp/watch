@@ -13,12 +13,13 @@ class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     # 用db的Column方法定义数据库的一个列叫name，db.String(20)定义name列的数据类型为字符串，最长为20字符
     # 普通用户：只能浏览
-    name = db.Column(db.String(20))
+    nickname = db.Column(db.String(20))
     # 增加一个管理用户名属性
     # 管理员用户：可能浏览、编辑
     username = db.Column(db.String(20))
     # 增加一个管理用户名的登录密码属性
     password_hash = db.Column(db.String(128))
+
 
     # 自定义方法set_password()用来设置密码，接受password作为参数
     def set_password(self, password):
@@ -39,3 +40,9 @@ class Movie(db.Model):
     id = db.Column(db.Integer, primary_key=True) # 见上面
     title = db.Column(db.String(60))             # 见上面
     year = db.Column(db.String(4))               # 见上面
+
+class Message(db.Model, UserMixin):
+    id = db.Column(db.Integer, primary_key=True)
+    nickname = db.Column(db.String(20))
+    dati = db.Column(db.String(40))
+    messages = db.Column(db.String(128))

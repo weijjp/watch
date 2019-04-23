@@ -4,9 +4,10 @@ from watch import app, db
 from flask import render_template, request, url_for, redirect, flash
 # 从flask_login扩展中导入LoginManager类，UserMixin类, login_user方法，logout_user方法，current_user属性
 from flask_login import login_user, login_required, logout_user, current_user
+from datetime import datetime
 # 从 watch包的models模块中导入User类 和 Movie类
 # 因为我们在__init__.py文件没有导入models模块，所以写成watch.models
-from watch.models import User, Movie
+from watch.models import User, Movie, Message
 
 ############ 数据库操作-------从数据库中读取数据
 @app.route('/', methods=['GET', 'POST']) #####版本1.2
@@ -128,7 +129,11 @@ def login():
             # 重新返回登录页面
             return redirect(url_for('login'))
         # 读取User表格的第一个记录(一个实例)，然后赋值给变量 user
-        user = User.query.first()
+        user = User.query.filter_by(username=username).first()
+        ###查看结果
+        # print(user)
+        # print(username)
+        # print(user.username)
         # 如果：
              # 变量username(表单输入的值)==user.username(User表格的第一个记录username列对应的值)
              # 并且，调用对象user的自定义validate_password()方法核对password，结果为True
@@ -173,9 +178,9 @@ def settings():
     # 如果以post方式访问
     if request.method == 'POST':
         # 读取表单：将request对象的表单的name键对应的值,赋给变量name
-        name = request.form['name']
+        nickname = request.form['nickname']
         # 如果表单输入为空值，或者输入值长度大于20个字符
-        if not name or len(name) > 20:
+        if not nickname or len(nickname) > 20:
             # 在后续页面闪现：无效输入
             flash('Invalid input.')
             # 重定向到settings设置页面
@@ -183,10 +188,12 @@ def settings():
         else:
             # 上面50行已完成了注册用户加载回调函数,即已完成Flask-Login的current_user变量的赋值
             # current_user即当前用户代理，将上面变量name(表单输入值)重写当前用户对象的name属性
-            current_user.name = name
+            current_user.nickname = nickname
             # current_user 会返回当前登录用户的数据库记录对象，等同于下面的用法：
             # user = User.query.first()
             # user.name = name
+            # user = User.query.filter_by(username=username).first()
+            # user.nickname = nickname
 
             # 将更新后的会话信息提交给数据库
             db.session.commit()
@@ -198,3 +205,60 @@ def settings():
     else:
         # 返回settings设置页面
         return render_template('settings.html')
+
+################################################################################在表单中注册管理员帐户
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        user = User.query.first()
+        if user is not None:
+            user.username = username
+            user.nickname = username
+            user.set_password(password)
+        else:
+            user = User(username=username, nickname=username)
+            user.set_password(password)
+            db.session.add(user)
+        db.session.commit()
+        flash('Register successfully.')
+        return redirect(url_for('index'))
+    else:
+        return render_template('register.html')
+
+################################################################################在表单中添加留言
+
+@app.route('/messages', methods=['GET', 'POST'])
+def messages():
+    user = current_user
+    if request.method == 'POST':
+        messages = request.form['messages']
+        dati = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        print(messages)
+        print(user.nickname)
+        print(dati)
+        message = Message(nickname=user.nickname, dati=dati, messages=messages)
+        db.session.add(message)
+        db.session.commit()
+        meges_1 = Message.query.all()
+        list=[]
+        n = len(meges_1)
+        for ms in meges_1:
+            list.append(meges_1[n-1])
+            n = n-1
+        meges_2 = list
+        print('-'*20)
+        for ms in meges_2:
+            print(ms.nickname, ms.dati, ms.messages)
+        flash('Leave messages successfully.')
+        return render_template('messages.html', messages=messages)
+    else:
+        meges_1 = Message.query.all()
+        list=[]
+        n = len(meges_1)
+        for ms in meges_1:
+            list.append(meges_1[n-1])
+            n = n-1
+        meges_2 = list
+        return render_template('messages.html', meges_2=meges_2)
